@@ -21,10 +21,10 @@ Deploy the lambda function, attach to a SQS queue, create a template in a CodeCo
 
 The message requires 4 attributes
 
-- *template*: The name of handlebars template without extension (.hbs)
-- *subject*: Email subject
-- *addresse*: Email addresse (to)
-- *data*: Data to evaluate the template
+- ***template***: The name of handlebars template without extension (.hbs)
+- ***subject***: Email subject
+- ***addresse***: Email addresse (to)
+- ***data***: Data to evaluate the template
 
 Example
 
@@ -32,7 +32,7 @@ Example
 {
     "template": "welcome_template",
     "subject": "Welcome email",
-    "addresse": "email @ domain".
+    "addresse": "email @ domain",
     "data": {
     }
 }
