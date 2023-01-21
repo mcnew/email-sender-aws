@@ -97,7 +97,7 @@ async function loadPartials(partials: [{ source: string, name: string }]) {
     return _loadPartials(partials, 0);
 }
 
-async function buildBody(configName: string, templateName: string, data: { any: any }) {
+async function buildBody(templateName: string, data: { any: any }) {
     return getTemplate(templateName)
             .then(template => template(data));
 }
@@ -143,12 +143,11 @@ async function _processMessages(messages: SQSRecord[], ndx: number): Promise<{ e
             next.unshift({ messageId: messageId, error: `invalid template(${messageId}): ${templateName}` });
             return next;
         } else {
-            let config = body.configuration;
             let templateContext = body.data;
             let subject = body.subject;
             let to = body.addresse;
 
-            return buildBody(config, templateName, templateContext)
+            return buildBody(templateName, templateContext)
                 .then(async (body): Promise<{ error?: string, messageId: string }[]> => {
                     let nextProm = _processMessages(messages, ndx + 1);
                     let current = await sendEmail(to, subject, body);
