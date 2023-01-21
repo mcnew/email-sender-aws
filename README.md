@@ -1,4 +1,4 @@
-# email sender aws (ts)
+# email sender aws (typescript)
 
 An Lambda function in javascript, using [Handlebars](https://handlebarsjs.com/) as templating engine to create html email body
 
