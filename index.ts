@@ -2,6 +2,7 @@ import { CodeCommitClient, GetFileCommand } from '@aws-sdk/client-codecommit';
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import * as Handlebars from 'handlebars';
 import { Context, SQSEvent, SQSRecord, SQSBatchResponse } from 'aws-lambda';
+import { nextTick } from 'process';
 
 const BRANCH = process.env.BRANCH;
 const REPOSITORY = process.env.REPOSITORY;
@@ -9,7 +10,7 @@ const DISABLE_CACHE = process.env.DISABLE_CACHE;
 const SOURCE_EMAIL = process.env.SOURCE_EMAIL;
 
 const _TEMPLATES: { [key: string]: HandlebarsTemplateDelegate<any> } = {};
-var configured = false;
+let configured = false;
 
 let codeCommit = new CodeCommitClient({
     apiVersion: "2015-04-13"
@@ -68,28 +69,40 @@ async function getTemplate(name: string) {
     }
 }
 
-async function _loadPartials(partials: [{ source: string, name: string }], ndx: number) {
+async function _loadPartials(partials: [{ source: string, name: string }], ndx: number): Promise<{partial: string, error?: string}[]> {
     if (partials.length === ndx) {
         return [];
     } else {
         let partial = partials[ndx];
-        return getTextFile(partial.source).then(async (text): Promise<{ partial: string, error?: string }[]> => {
-            let current;
-            if (text) {
-                Handlebars.registerPartial(partial.name, text);
-                current = {
-                    partial: partial.name,
-                };
-            } else {
-                current = {
-                    partial: partial.name,
-                    error: 'empty or not found'
-                };
-            }
+        var original = partial.source;
+        if (original.startsWith('/') || original.startsWith('.')) {
             let next = await _loadPartials(partials, ndx + 1);
-            next.unshift(current);
+            next.unshift({
+                partial: partial.name,
+                error: 'invalid partial'
+            });
             return next;
-        });
+        } else {
+            let source = `/partial/${partial.source}.hbs`
+            console.log(`load partial: ${source}`);
+            return getTextFile(source).then(async (text): Promise<{ partial: string, error?: string }[]> => {
+                let current;
+                if (text) {
+                    Handlebars.registerPartial(partial.name, text);
+                    current = {
+                        partial: partial.name,
+                    };
+                } else {
+                    current = {
+                        partial: partial.name,
+                        error: 'empty or not found'
+                    };
+                }
+                let next = await _loadPartials(partials, ndx + 1);
+                next.unshift(current);
+                return next;
+            });
+        }
     }
 }
 
