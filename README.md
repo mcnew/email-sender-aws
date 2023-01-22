@@ -56,7 +56,7 @@ Git structure
 Example
 ```json
 {
-    "partials": [
+    "partial": [
         "header",
         "footer"
     ]
