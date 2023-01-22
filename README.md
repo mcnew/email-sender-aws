@@ -57,8 +57,8 @@ Example
 ```json
 {
     "partials": [
-        "/partials/header.hbs",
-        "/partials/footer.hbs"
+        "header",
+        "footer"
     ]
 }
 ```
