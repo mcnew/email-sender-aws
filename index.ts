@@ -2,7 +2,6 @@ import { CodeCommitClient, GetFileCommand } from '@aws-sdk/client-codecommit';
 import { SendEmailCommand, SESClient } from '@aws-sdk/client-ses';
 import * as Handlebars from 'handlebars';
 import { Context, SQSEvent, SQSRecord, SQSBatchResponse } from 'aws-lambda';
-import { nextTick } from 'process';
 
 const BRANCH = process.env.BRANCH;
 const REPOSITORY = process.env.REPOSITORY;
